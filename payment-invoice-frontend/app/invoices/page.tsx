@@ -1,13 +1,11 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { invoiceSchema } from "@/lib/validation/invoice";
+import { invoiceSchema, Invoice } from "@/lib/validation/invoice";
 
 
 export default async function Invoices() {
@@ -26,7 +24,7 @@ export default async function Invoices() {
   if (!response.ok) throw new Error("Failed to fetch invoices");
 
   const data = await response.json();
-  const invoices = data.results.map((inv: any) => invoiceSchema.parse(inv));
+  const invoices = data.results.map((inv: Invoice) => invoiceSchema.parse(inv));
   return (
     <SidebarProvider
       style={
