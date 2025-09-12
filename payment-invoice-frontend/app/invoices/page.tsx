@@ -14,7 +14,8 @@ export default async function Invoices() {
   const username = process.env.DJANGO_USER!;
   const password = process.env.DJANGO_PASS!;
   const apiUrl = process.env.API_URL!;
-  const response = await fetch(apiUrl, {
+
+  const response = await fetch(`${apiUrl}invoices`, {
     cache: "no-store",
     headers: {
       Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
