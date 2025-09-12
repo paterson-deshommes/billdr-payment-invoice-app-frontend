@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { InvoicePaymentTable } from "@/components/invoice-payment-table"
 import Link from "next/link";
 import {
   SidebarInset,
@@ -57,6 +58,10 @@ export default async function InvoiceDetails({ params }: Props) {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <InvoiceDetailCard invoiceDetail={invoiceDetail} publicUrl={invoicePublicUrl}/>
+            </div>
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <h1 className="text-3xl font-bold mb-4">Payment History</h1>
+              <InvoicePaymentTable data={invoiceDetail.payments} />
             </div>
           </div>
         </div>
