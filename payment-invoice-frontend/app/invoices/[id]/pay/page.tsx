@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Elements,
-  useStripe,
-  useElements,
+  // useStripe,
+  // useElements,
   PaymentElement
 } from "@stripe/react-stripe-js";
 import { AppSidebar } from "@/components/app-sidebar"
@@ -37,14 +37,14 @@ export function InputWithButton() {
 
 function CheckoutForm({invoiceDetail, amount, setAmount}: {
   invoiceDetail: z.infer<typeof invoiceDetailSchema>,
-  amount: Number,
+  amount: number,
   setAmount:  React.Dispatch<React.SetStateAction<number>>
 }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = React.useState(false);
-   const [clientSecret, setClientSecret] = React.useState<string | null>(null);
-  const [message, setMessage] = React.useState<string | null>(null);
+  // const stripe = useStripe();
+  // const elements = useElements();
+  //const [loading, setLoading] = React.useState(false);
+  //const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+  //const [message, setMessage] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const minAmount = 1;
@@ -85,36 +85,36 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!stripe || !elements) return;
 
-    setLoading(true);
+  //   //setLoading(true);
 
-    const res = await fetch("/api/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: Number(amount) }),
-    });
-    const data = await res.json();
-    setClientSecret(data.clientSecret);
+  //   const res = await fetch("/api/create-payment-intent", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ amount: Number(amount) }),
+  //   });
+  //   const data = await res.json();
+  //   //setClientSecret(data.clientSecret);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      clientSecret: data.clientSecret,
-      confirmParams: {
-        return_url: process.env.NEXT_PAYMENT_RETURN_URL!
-      }
-    });
+  //   const { error } = await stripe.confirmPayment({
+  //     elements,
+  //     clientSecret: data.clientSecret,
+  //     confirmParams: {
+  //       return_url: process.env.NEXT_PAYMENT_RETURN_URL!
+  //     }
+  //   });
 
-    if (error) {
-      setMessage(error.message ?? "Payment failed");
-    } else {
-      setMessage("Payment successful!");
-    }
+  //   if (error) {
+  //     setMessage(error.message ?? "Payment failed");
+  //   } else {
+  //     setMessage("Payment successful!");
+  //   }
 
-    setLoading(false);
-  };
+  //   //setLoading(false);
+  // };
 
   return (
     <div>
@@ -129,7 +129,7 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
       <Button type="submit" variant="outline">
         {`Pay $${amount}`}
       </Button>
-      {message && <p>{message}</p>}
+      {/* {message && <p>{message}</p>} */}
     </div>
   );
 }
@@ -140,7 +140,6 @@ export default function Pay() {
   const invoiceData = searchParams.get("data");
   const invoiceDetail = invoiceData ? JSON.parse(decodeURIComponent(invoiceData)) : null;
   const [amount, setAmount] = React.useState(Number(invoiceDetail.amount_remaining));
-  const [message, setMessage] = React.useState<string | null>(null);
 
   const options: StripeElementsOptions = {
     mode: 'payment',

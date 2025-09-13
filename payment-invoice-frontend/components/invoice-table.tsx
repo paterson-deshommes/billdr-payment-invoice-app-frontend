@@ -49,9 +49,6 @@ import { z } from "zod"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  ChartConfig,
-} from "@/components/ui/chart"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -168,12 +165,6 @@ export function InvoiceTable({
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      let color = "red";
-      if(row.original.status === "paid")
-      {
-        color = "green";
-      }
-
       return (
       <Badge variant="outline" className="text-muted-foreground px-1.5">
         {
