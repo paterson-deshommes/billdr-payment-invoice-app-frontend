@@ -26,6 +26,7 @@ export const invoicePaymentSchema = z.object({
 })
 
 export const invoiceDetailSchema = invoiceSchema.extend({
+    customer_id: z.string(),
     customer_phone: z.string(),
     customer_email: z.string(),
     line_items: z.array(invoiceItemSchema),

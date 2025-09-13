@@ -113,7 +113,12 @@ function InvoiceDetailCard({invoiceDetail, publicUrl} : {
           </div>
           <div className="flex flex-col gap-2">
             <div className="font-semibold">Public Invoice Link</div>
-            <Link href={`/invoices/${invoiceDetail.id}/pay`}>
+             <Link
+            href={{
+              pathname: `/invoices/${invoiceDetail.id}/pay`,
+              query: { data: encodeURIComponent(JSON.stringify(invoiceDetail)) },
+            }}
+          >
             {publicUrl}
             </Link>
           </div>
