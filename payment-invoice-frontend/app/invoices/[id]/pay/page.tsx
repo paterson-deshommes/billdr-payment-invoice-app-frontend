@@ -3,13 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import * as React from 'react';
 import { useRef } from "react";
-import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js";
+import { loadStripe, StripeElementsOptions, StripeError } from "@stripe/stripe-js";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Elements,
-  // useStripe,
-  // useElements,
+  useStripe,
+  useElements,
   PaymentElement
 } from "@stripe/react-stripe-js";
 import { AppSidebar } from "@/components/app-sidebar"
@@ -40,15 +40,16 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
   amount: number,
   setAmount:  React.Dispatch<React.SetStateAction<number>>
 }) {
-  // const stripe = useStripe();
-  // const elements = useElements();
-  //const [loading, setLoading] = React.useState(false);
-  //const [clientSecret, setClientSecret] = React.useState<string | null>(null);
-  //const [message, setMessage] = React.useState<string | null>(null);
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = React.useState(false);
+  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+  const [message, setMessage] = React.useState<string | null | undefined>(null);
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const minAmount = 1;
-  const maxAmount = Number(invoiceDetail.amount_remaining);
+  const centMultiplier = 100;
+  const minAmount = 1 * centMultiplier;
+  const maxAmount = Number(invoiceDetail.amount_remaining) * centMultiplier;
 
 
   const handleAmountClick = () => {
@@ -61,16 +62,16 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
         return;
       }
 
-      amountNumber = Math.round(amountNumber * 100) / 100
+      amountNumber = Math.round(amountNumber * centMultiplier);
       if(amountNumber < minAmount)
       {
-        setError(`The amount must be bigger than ${minAmount}`);
+        setError(`The amount must be bigger than ${minAmount / centMultiplier}`);
         return;
       }
 
       if(amountNumber > maxAmount)
       {
-        setError(`The amount must be smaller than ${maxAmount}`);
+        setError(`The amount must be smaller than ${maxAmount / centMultiplier}`);
         return;
       }
 
@@ -85,36 +86,60 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
     }
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!stripe || !elements) return;
+   const handleError = (error: StripeError) => {
+    setLoading(false);
+    setMessage(error.message);
+  }
 
-  //   //setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
 
-  //   const res = await fetch("/api/create-payment-intent", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ amount: Number(amount) }),
-  //   });
-  //   const data = await res.json();
-  //   //setClientSecret(data.clientSecret);
+    setLoading(true);
 
-  //   const { error } = await stripe.confirmPayment({
-  //     elements,
-  //     clientSecret: data.clientSecret,
-  //     confirmParams: {
-  //       return_url: process.env.NEXT_PAYMENT_RETURN_URL!
-  //     }
-  //   });
+    const {error: submitError} = await elements.submit();
+    if (submitError) {
+      handleError(submitError);
+      return;
+    }
 
-  //   if (error) {
-  //     setMessage(error.message ?? "Payment failed");
-  //   } else {
-  //     setMessage("Payment successful!");
-  //   }
+    const username = process.env.NEXT_PUBLIC_DJANGO_USER!;
+    const password = process.env.NEXT_PUBLIC_DJANGO_PASS!;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
 
-  //   //setLoading(false);
-  // };
+    const response = await fetch(`${apiUrl}paymentintent/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: amount,
+        invoice_id: invoiceDetail.id,
+        customer_id: invoiceDetail.customer_id,
+        currency: invoiceDetail.currency
+      })
+    });
+
+    const data = await response.json();
+    //setClientSecret(data.client_secret);
+
+    const { error } = await stripe.confirmPayment({
+      elements,
+      clientSecret: data.client_secret,
+      confirmParams: {
+        return_url: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL!
+      }
+    });
+
+    if (error) {
+      setMessage(error.message ?? "Payment failed");
+    } else {
+      setMessage("Payment successful!");
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div>
@@ -126,10 +151,10 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
       </div>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       <PaymentElement />
-      <Button type="submit" variant="outline">
-        {`Pay $${amount}`}
+      <Button type="submit" variant="outline" onClick={handleSubmit}>
+        {`Pay $${amount / 100}`}
       </Button>
-      {/* {message && <p>{message}</p>} */}
+      {message && <p>{message}</p>}
     </div>
   );
 }
@@ -139,7 +164,7 @@ export default function Pay() {
   const searchParams = useSearchParams();
   const invoiceData = searchParams.get("data");
   const invoiceDetail = invoiceData ? JSON.parse(decodeURIComponent(invoiceData)) : null;
-  const [amount, setAmount] = React.useState(Number(invoiceDetail.amount_remaining));
+  const [amount, setAmount] = React.useState(Number(invoiceDetail.amount_remaining) * 100);
 
   const options: StripeElementsOptions = {
     mode: 'payment',
