@@ -43,7 +43,6 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = React.useState(false);
-  const [clientSecret, setClientSecret] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null | undefined>(null);
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,7 +121,6 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
     });
 
     const data = await response.json();
-    //setClientSecret(data.client_secret);
 
     const { error } = await stripe.confirmPayment({
       elements,
