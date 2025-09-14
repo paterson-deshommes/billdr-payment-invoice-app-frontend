@@ -42,7 +42,6 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
 }) {
   const stripe = useStripe();
   const elements = useElements();
-  const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null | undefined>(null);
   const [error, setError] = React.useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,15 +85,12 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
   };
 
    const handleError = (error: StripeError) => {
-    setLoading(false);
     setMessage(error.message);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) return;
-
-    setLoading(true);
 
     const {error: submitError} = await elements.submit();
     if (submitError) {
@@ -135,8 +131,6 @@ function CheckoutForm({invoiceDetail, amount, setAmount}: {
     } else {
       setMessage("Payment successful!");
     }
-
-    setLoading(false);
   };
 
   return (

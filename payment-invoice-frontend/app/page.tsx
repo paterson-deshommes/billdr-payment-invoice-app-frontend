@@ -1,8 +1,9 @@
-"use client"
-import { redirect, useRouter, useSearchParams  } from "next/navigation";
+
+"use client";
+import { useRouter, useSearchParams  } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner"
-import { useEffect  } from "react";
+import { useEffect, Suspense  } from "react";
 import {
   useStripe,
   Elements
@@ -16,10 +17,11 @@ function PaymentStatus() {
   const paymentIntentClientSecret = searchParams.get("payment_intent_client_secret");
   const router = useRouter();
 
-  if(!paymentIntentClientSecret)
-  {
-    redirect("/invoices");
-  }
+  useEffect(() => {
+    if (!paymentIntentClientSecret) {
+      router.replace("/invoices");
+    }
+  }, [paymentIntentClientSecret, router]);
 
   useEffect(() => {
     if (!stripe || !paymentIntentClientSecret) return;
@@ -45,7 +47,7 @@ function PaymentStatus() {
     setTimeout(() => {
       router.push("/invoices");
     }, 1500);
-  }, [stripe]);
+  }, [stripe, router, paymentIntentClientSecret]);
 
   return null;
 }
@@ -53,7 +55,9 @@ function PaymentStatus() {
 export default function Home() {
   return (
   <Elements stripe={stripePromise}>
-    <PaymentStatus/>
+    <Suspense>
+      <PaymentStatus/>
+    </Suspense>
   </Elements>
 );
 }
