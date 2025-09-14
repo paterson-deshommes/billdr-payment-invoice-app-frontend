@@ -24,16 +24,6 @@ import {z} from "zod";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-export function InputWithButton() {
-  return (
-    <div className="flex w-full max-w-sm items-center gap-2">
-      <Input type="email" placeholder="Email" />
-      <Button type="submit" variant="outline">
-        Subscribe
-      </Button>
-    </div>
-  )
-}
 
 function CheckoutForm({invoiceDetail, amount, setAmount}: {
   invoiceDetail: z.infer<typeof invoiceDetailSchema>,
@@ -157,6 +147,7 @@ export default function Pay() {
   const invoiceData = searchParams.get("data");
   const invoiceDetail = invoiceData ? JSON.parse(decodeURIComponent(invoiceData)) : null;
   const [amount, setAmount] = React.useState(Number(invoiceDetail.amount_remaining) * 100);
+  const notFullyPaid = Number(invoiceDetail.amount_remaining) > 0;
 
   const options: StripeElementsOptions = {
     mode: 'payment',
@@ -181,9 +172,11 @@ export default function Pay() {
               <InvoiceDetailCard invoiceDetail={invoiceDetail}/>
             </div>
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              {notFullyPaid &&
               <Elements stripe={stripePromise} options={options}>
                 <CheckoutForm invoiceDetail={invoiceDetail} amount={amount} setAmount={setAmount}/>
               </Elements>
+              }
             </div>
           </div>
         </div>
