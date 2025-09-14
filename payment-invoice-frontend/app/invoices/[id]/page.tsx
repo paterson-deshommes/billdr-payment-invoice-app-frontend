@@ -117,7 +117,7 @@ function InvoiceDetailCard({invoiceDetail, publicUrl} : {
             href={{
               pathname: `/invoices/${invoiceDetail.id}/pay`,
               query: { data: encodeURIComponent(JSON.stringify(invoiceDetail)) },
-            }}
+            }} className="text-blue-600 hover:underline"
           >
             {publicUrl}
             </Link>

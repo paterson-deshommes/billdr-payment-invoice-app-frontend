@@ -10,6 +10,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+import Link from "next/link";
+
 export function NavMain({
   items,
 }: {
@@ -29,7 +31,13 @@ export function NavMain({
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
               <IconCirclePlusFilled />
-              <span>Invoices</span>
+              <Link
+            href={{
+              pathname: "/invoices"
+            }}
+          >
+            Invoices
+            </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
